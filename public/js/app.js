@@ -36920,8 +36920,6 @@ module.exports = function(module) {
 
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
-__webpack_require__(/*! ./facebook */ "./resources/js/facebook.js");
-
 /***/ }),
 
 /***/ "./resources/js/bootstrap.js":
@@ -36966,39 +36964,6 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     encrypted: true
 // });
-
-/***/ }),
-
-/***/ "./resources/js/facebook.js":
-/*!**********************************!*\
-  !*** ./resources/js/facebook.js ***!
-  \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-window.fbAsyncInit = function () {
-  FB.init({
-    appId: '{your-app-id}',
-    cookie: true,
-    xfbml: true,
-    version: '{api-version}'
-  });
-  FB.AppEvents.logPageView();
-};
-
-(function (d, s, id) {
-  var js,
-      fjs = d.getElementsByTagName(s)[0];
-
-  if (d.getElementById(id)) {
-    return;
-  }
-
-  js = d.createElement(s);
-  js.id = id;
-  js.src = "https://connect.facebook.net/en_US/sdk.js";
-  fjs.parentNode.insertBefore(js, fjs);
-})(document, 'script', 'facebook-jssdk');
 
 /***/ }),
 

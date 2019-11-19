@@ -1,0 +1,9 @@
+.scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* [3] */
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+.scroll::-webkit-scrollbar {
+    display: none;
+}
