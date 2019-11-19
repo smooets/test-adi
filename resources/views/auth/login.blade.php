@@ -55,12 +55,12 @@
 
                 <div class="form-group align-content-center">
                     <div class="col-8 offset-2">
-                        <a href="{{ route('auth.google.redirect') }}" class="btn btn-sm btn-primary col-12"><i class="fa fa-google"></i> Google</a>
+                        <a href="{{ route('auth.google.redirect') }}" class="btn btn-sm btn-danger col-12"><i class="fa fa-google"></i> Google</a>
                     </div>
                 </div>
                 <div class="form-group align-content-center">
                     <div class="col-8 offset-2">
-                        <a href="{{ route('auth.facebook.redirect') }}" class="btn btn-sm btn-primary col-12"><i class="fa fa-google"></i> Facebook</a>
+                        <a href="{{ route('auth.facebook.redirect') }}" class="btn btn-sm btn-primary col-12"><i class="fa fa-facebook"></i> Facebook</a>
                     </div>
                 </div>
 

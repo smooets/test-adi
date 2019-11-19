@@ -1,37 +1,41 @@
 @extends('product::layouts.landing')
 
+@section('title', $title)
+
 @section('contents')
     <!-- Top Navbar -->
-    <nav class="navbar navbar-light bg-light">
-        <form class="my-auto d-inline w-100">
-            <div class="input-group">
-                <span id="brand" class="input-group-append mr-3 mt-1"><i class="fa fa-heart-o fa-2x"></i></span>
-                <input id="search" type="text" class="form-control" placeholder="Search">
-            </div>
-        </form>
+    <nav class="navbar navbar-toggleable-xl fixed-top navbar-light bg-light">
+    <span>
+        <a class="navbar-brand" href="javascript:history.back()"><i class="fa fa-arrow-left"></i></a>
+        <span class="font-weight-bold">{{ $title }}</span>
+    </span>
     </nav>
-    <!-- End Top Navbar -->
+    <!-- End top Navbar -->
     <!-- Container -->
-    <div id="body-container" class="container-fluid pb-60">
-        <!-- Categories -->
-        @include('product::partials.categories', ['categories' => $categories])
-        <!-- End Categories -->
+    <div class="container-fluid pt-60 pb-60">
         <!-- Products -->
         @if(!is_null($products))
-            @include('product::partials.card-square', ['products' => $products])
+            @include('product::partials.card-horizontal', ['products' => $products])
         @else
             <div class="col-12 col-md-6 p-2">
-                <p class="text-center">Whoops, product not found.</p>
+                <p class="text-center">Whoops, you never buy somethings.</p>
             </div>
         @endif
-        <!-- End Product-->
+        <!-- End Products-->
+        <!-- Logout-->
+        @if(\Auth::check())
+            <a class="btn btn-danger col-12" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+                {{ __('Logout') }}
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
+    @endif
+    <!-- End Logout-->
     </div>
     <!-- End Container -->
-    <!-- Search Container -->
-    <div id="search-container" class="container-fluid pb-60 d-none"></div>
-    <!-- End Search Container -->
     <!-- Bottom Navbar -->
-    <nav id="bottom-navbar" class="navbar navbar-toggleable-xl navbar-light bg-light fixed-bottom text-center">
+    <nav class="navbar navbar-toggleable-xl navbar-light bg-light fixed-bottom text-center">
         <div class="navbar-expand ml-auto mx-auto" id="navbarSupportedContent">
             <ul class="navbar-nav">
                 <li class="nav-item font-weight-bold">
@@ -50,8 +54,4 @@
         </div>
     </nav>
     <!-- End Bottom Navbar -->
-@endsection
-
-@section('scripts')
-    <script src="{{ asset('js/product/index.js') }}"></script>
 @endsection
