@@ -84,6 +84,23 @@ class ProductRepository implements ProductRepositoryInterface {
     }
 
     /**
+     * Get product by name
+     *
+     * @param string $name
+     * @return Collection
+     */
+    public function productByName(string $name)
+    {
+        $products = Cache::get($this::PRODUCT);
+        if(is_null($products) || $products->isEmpty()) {
+            $products = $this->products();
+        }
+        return $products->filter(function($product) use ($name) {
+            return false != stristr($product->title, $name);
+        });
+    }
+
+    /**
      * Buy product by id and store to session
      *
      * @param int $id

@@ -29,6 +29,14 @@ interface ProductRepositoryInterface {
     public function productById(int $id);
 
     /**
+     * Get product by name
+     *
+     * @param string $name
+     * @return Collection
+     */
+    public function productByName(string $name);
+
+    /**
      * Buy product by id and store to session
      *
      * @param int $id

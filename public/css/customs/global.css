@@ -1,3 +1,7 @@
+a {
+    text-decoration: none !important;
+}
+
 .scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; /* [3] */
@@ -6,4 +10,17 @@
 
 .scroll::-webkit-scrollbar {
     display: none;
+}
+
+.pt-60 {
+    padding-top: 60px;
+}
+
+.pb-60 {
+    padding-bottom: 60px;
+}
+
+.thumbnail {
+    width: 125px;
+    max-height: 75px;
 }
