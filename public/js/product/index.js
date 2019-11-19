@@ -9,7 +9,7 @@ function delay(callback, ms) {
     };
 }
 function searchProduct(){
-    let url = window.location.href + 'api/search';
+    let url = window.location.href + 'search';
     let q = $('#search').val();
     let searchContainer = $('#search-container');
     if(q) {
