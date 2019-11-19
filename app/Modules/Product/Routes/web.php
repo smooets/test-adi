@@ -11,7 +11,9 @@
 |
 */
 
-Route::name('product.')->group(function () {
+Route::middleware(['auth'])->name('product.')->group(function () {
     Route::get('product/{id}/show', 'ProductController@show')->name('show');
+    Route::post('buy', 'ProductController@buy')->name('buy');
+    Route::get('history', 'ProductController@history')->name('history');
     Route::get('/', 'ProductController@index')->name('index');
 });

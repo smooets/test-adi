@@ -29,4 +29,16 @@ class ProductController extends Controller
         $product = $this->productRepository->productById($id);
         return view('product::show', compact('product'));
     }
+
+    public function buy()
+    {
+        $id = request('pid');
+        $this->productRepository->productBuyById($id);
+    }
+
+    public function history()
+    {
+        $products = session($this->productRepository::PRODUCT);
+        return view('product::history', compact('products'));
+    }
 }
