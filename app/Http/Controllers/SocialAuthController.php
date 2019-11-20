@@ -31,28 +31,10 @@ class SocialAuthController extends Controller
      */
     public function googleCallback()
     {
+        $driver = 'google';
         try {
-            $googleUser = Socialite::driver('google')->user();
-            $existUser = User::where('email', $googleUser->email)->first();
-            if($existUser) {
-                Auth::loginUsingId($existUser->id);
-                if(is_null($existUser->google_id)) {
-                    $existUser->update(['google_id' => $googleUser->id]);
-                }
-            } else {
-                $user = new User;
-                $faker = Factory::create();
-                $username = $this->generateUniqueUsernameByEmail($googleUser->name);
-
-                $user->name = $googleUser->name;
-                $user->email = $googleUser->email;
-                $user->username = $username;
-                $user->email_verified_at = Carbon::now();
-                $user->google_id = $googleUser->id;
-                $user->password = $faker->regexify('[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}');
-                $user->save();
-                Auth::loginUsingId($user->id);
-            }
+            $googleUser = Socialite::driver($driver)->user();
+            $this->createOrGetUser($googleUser, $driver);
             return redirect()->route('home');
         }
         catch (Exception $e) {
@@ -80,7 +62,16 @@ class SocialAuthController extends Controller
      */
     public function facebookCallback()
     {
-        //
+        $driver = 'facebook';
+        try {
+            $fbUser = Socialite::driver($driver)->user();
+            $this->createOrGetUser($fbUser, $driver);
+            return redirect()->route('home');
+        }
+        catch (Exception $e) {
+            Log::error($e);
+            return 'error';
+        }
     }
 
     /**
@@ -91,7 +82,7 @@ class SocialAuthController extends Controller
      */
     private function generateUniqueUsernameByEmail(string $email) : string
     {
-        $username = $new_username = explode('@', $email)[0];
+        $username = $new_username = preg_match("/^[a-zA-Z0-9]+$/", strtolower(explode('@', $email)[0]));
         $next = 2;
         while (User::where('username', '=', $username)->first()) {
             $username = "{$new_username}.{$next}";
@@ -99,5 +90,36 @@ class SocialAuthController extends Controller
         }
 
         return $username;
+    }
+
+    /**
+     * Create or get user from social media
+     *
+     * @param $socialUser
+     * @param $driver
+     */
+    private function createOrGetUser($socialUser, $driver)
+    {
+        $existUser = User::where('email', $socialUser->email)->first();
+        $userId = $driver.'_id';
+        if($existUser) {
+            Auth::loginUsingId($existUser->id);
+            if(is_null($existUser->$userId)) {
+                $existUser->update([$userId => $socialUser->id]);
+            }
+        } else {
+            $user = new User;
+            $faker = Factory::create();
+            $username = $this->generateUniqueUsernameByEmail($socialUser->name);
+
+            $user->name = $socialUser->name;
+            $user->email = $socialUser->email;
+            $user->username = $username;
+            $user->email_verified_at = Carbon::now();
+            $user->$userId = $socialUser->id;
+            $user->password = $faker->regexify('[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}');
+            $user->save();
+            Auth::loginUsingId($user->id);
+        }
     }
 }
