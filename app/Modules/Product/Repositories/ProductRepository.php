@@ -3,9 +3,10 @@
 namespace App\Modules\Product\Repositories;
 
 use App\Modules\Product\Repositories\Contracts\ProductRepositoryInterface;
+use Cache;
 use Exception;
 use GuzzleHttp\Client;
-use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use stdClass;
 
 class ProductRepository implements ProductRepositoryInterface {
@@ -14,39 +15,72 @@ class ProductRepository implements ProductRepositoryInterface {
     const PRODUCT = 'productPromo';
     const CATEGORY = 'category';
 
+    protected $cacheTime;
+
+    /**
+     * ProductRepository constructor.
+     *
+     * @param int $cacheTime
+     */
+    public function __construct(int $cacheTime = 60)
+    {
+        $this->cacheTime = $cacheTime;
+    }
+
     /**
      * Get all products
      *
-     * @return object
+     * @return Collection
      */
     public function productsWithCategories()
     {
-        try {
-            $client = new Client();
-            $request = $client->get(self::URL);
-            $response = $request->getBody()->getContents();
-            $data = collect(json_decode($response)[0]->data);
-        } catch (Exception $e) {
-            $data = collect([
-                self::CATEGORY => new stdClass(),
-                self::PRODUCT => new stdClass(),
-            ]);
+        $data = Cache::get('data');
+        if(is_null($data) || collect($data[$this::CATEGORY])->isEmpty() || collect($data[$this::CATEGORY])->isEmpty()) {
+            try {
+                $client = new Client();
+                $request = $client->get($this::URL);
+                $response = $request->getBody()->getContents();
+                $data = collect(json_decode($response)[0]->data);
+            } catch (Exception $e) {
+                $data = collect([
+                    $this::CATEGORY => new stdClass(),
+                    $this::PRODUCT => new stdClass(),
+                ]);
+            }
+
+            if($this->cacheTime > 0) {
+                Cache::put($this::CATEGORY, collect($data[$this::CATEGORY]), $this->cacheTime);
+                Cache::put($this::PRODUCT, collect($data[$this::PRODUCT]), $this->cacheTime);
+                Cache::put('data', $data, $this->cacheTime);
+            }
         }
-        session([self::CATEGORY => collect($data[self::CATEGORY])]);
-        session([self::PRODUCT => collect($data[self::PRODUCT])]);
 
         return $data;
     }
 
     /**
+     * Get all products
+     *
+     * @return Collection
+     */
+    public function products()
+    {
+        $products = Cache::get($this::PRODUCT);
+        if(is_null($products) || $products->isEmpty()) {
+            $products = collect($this->productsWithCategories()[$this::PRODUCT]);
+        }
+        return $products;
+    }
+
+    /**
      * Get product by id
      *
-     * @param string $id
-     * @return object
+     * @param int $id
+     * @return Collection
      */
-    public function productById(string $id)
+    public function productById(int $id)
     {
-        $products = request()->session()->get(self::PRODUCT);
+        $products = Cache::get($this::PRODUCT);
         if(is_null($products) || $products->isEmpty()) {
             $products = $this->products();
         }
@@ -54,22 +88,61 @@ class ProductRepository implements ProductRepositoryInterface {
     }
 
     /**
-     * Get all products
+     * Get product by name
      *
-     * @return object
+     * @param string $name
+     * @return Collection
      */
-    public function products()
+    public function productByName(string $name)
     {
-        return $this->productsWithCategories()[self::PRODUCT];
+        $products = Cache::get($this::PRODUCT);
+        if(is_null($products) || $products->isEmpty()) {
+            $products = $this->products();
+        }
+        return $products->filter(function($product) use ($name) {
+            return false != stristr($product->title, $name);
+        });
+    }
+
+    /**
+     * Buy product by id and store to session
+     *
+     * @param int $id
+     * @return Collection
+     */
+    public function productBuyById(int $id)
+    {
+        $product = $this->productById($id);
+        session()->push($this::PRODUCT, $product);
     }
 
     /**
      * Get all categories
      *
-     * @return object
+     * @return Collection
      */
     public function categories()
     {
-        return $this->productsWithCategories()[self::CATEGORY];
+        $categories = Cache::get($this::PRODUCT);
+        if(is_null($categories) || $categories->isEmpty()) {
+            $products = collect($this->productsWithCategories()[$this::CATEGORY]);
+        }
+        return $products;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCacheTime(): int
+    {
+        return $this->cacheTime;
+    }
+
+    /**
+     * @param int $cacheTime
+     */
+    public function setCacheTime(int $cacheTime): void
+    {
+        $this->cacheTime = $cacheTime;
     }
 }

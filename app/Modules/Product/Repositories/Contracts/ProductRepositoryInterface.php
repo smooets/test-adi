@@ -2,36 +2,52 @@
 
 namespace App\Modules\Product\Repositories\Contracts;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 interface ProductRepositoryInterface {
 
     /**
      * Get all products with categories
      *
-     * @return object
+     * @return Collection
      */
     public function productsWithCategories();
 
     /**
      * Get all products
      *
-     * @return object
+     * @return Collection
      */
     public function products();
 
     /**
      * Get product by id
      *
-     * @param string $id
-     * @return object
+     * @param int $id
+     * @return Collection
      */
-    public function productById(string $id);
+    public function productById(int $id);
+
+    /**
+     * Get product by name
+     *
+     * @param string $name
+     * @return Collection
+     */
+    public function productByName(string $name);
+
+    /**
+     * Buy product by id and store to session
+     *
+     * @param int $id
+     * @return Collection
+     */
+    public function productBuyById(int $id);
 
     /**
      * Get all categories
      *
-     * @return object
+     * @return Collection
      */
     public function categories();
 }
