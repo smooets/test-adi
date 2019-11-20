@@ -11,10 +11,6 @@ use stdClass;
 
 class ProductRepository implements ProductRepositoryInterface {
 
-    const URL = 'https://private-4639ce-ecommerce56.apiary-mock.com/home';
-    const PRODUCT = 'productPromo';
-    const CATEGORY = 'category';
-
     protected $cacheTime;
 
     /**
@@ -36,22 +32,23 @@ class ProductRepository implements ProductRepositoryInterface {
     {
         $data = Cache::get('data');
         if(is_null($data) || collect($data[$this::CATEGORY])->isEmpty() || collect($data[$this::CATEGORY])->isEmpty()) {
-            try {
-                $client = new Client();
-                $request = $client->get($this::URL);
-                $response = $request->getBody()->getContents();
-                $data = collect(json_decode($response)[0]->data);
-            } catch (Exception $e) {
-                $data = collect([
-                    $this::CATEGORY => new stdClass(),
-                    $this::PRODUCT => new stdClass(),
-                ]);
-            }
+            $data = Cache::remember('data', $this->cacheTime, function () {
+                try {
+                    $client = new Client();
+                    $request = $client->get($this::URL);
+                    $response = $request->getBody()->getContents();
+                    return collect(json_decode($response)[0]->data);
+                } catch (Exception $e) {
+                    return collect([
+                        $this::CATEGORY => new stdClass(),
+                        $this::PRODUCT => new stdClass(),
+                    ]);
+                }
+            });
 
             if($this->cacheTime > 0) {
                 Cache::put($this::CATEGORY, collect($data[$this::CATEGORY]), $this->cacheTime);
                 Cache::put($this::PRODUCT, collect($data[$this::PRODUCT]), $this->cacheTime);
-                Cache::put('data', $data, $this->cacheTime);
             }
         }
 
@@ -131,6 +128,8 @@ class ProductRepository implements ProductRepositoryInterface {
     }
 
     /**
+     * Get cache time
+     *
      * @return int
      */
     public function getCacheTime(): int
@@ -139,7 +138,10 @@ class ProductRepository implements ProductRepositoryInterface {
     }
 
     /**
+     * Set cache time
+     *
      * @param int $cacheTime
+     * @return void
      */
     public function setCacheTime(int $cacheTime): void
     {

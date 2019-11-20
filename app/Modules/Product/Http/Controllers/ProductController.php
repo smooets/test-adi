@@ -3,13 +3,17 @@
 namespace App\Modules\Product\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Product\Repositories\ProductRepository;
+use App\Modules\Product\Repositories\Contracts\ProductRepositoryInterface;
 
 class ProductController extends Controller
 {
     protected $productRepository;
 
-    public function __construct(ProductRepository $productRepository)
+    /**
+     * ProductController constructor.
+     * @param ProductRepositoryInterface $productRepository
+     */
+    public function __construct(ProductRepositoryInterface $productRepository)
     {
         $this->productRepository = $productRepository;
         $this->productRepository->setCacheTime(10);
